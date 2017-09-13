@@ -1,0 +1,9 @@
+[package]
+name = "jirasync"
+version = "0.1.0"
+authors = ["David Brown <david.brown@linaro.org>"]
+
+[dependencies]
+goji = "0.1"
+hyper = "0.9"
+netrc = "0.4"
