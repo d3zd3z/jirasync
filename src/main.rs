@@ -9,7 +9,6 @@ extern crate hyper;
 extern crate netrc;
 
 use goji::{Credentials, Issue, Jira, SearchOptions};
-use hyper::Client;
 use netrc::Netrc;
 use std::fs::File;
 use std::io::BufReader;
@@ -27,11 +26,9 @@ use std::env;
 // TODO: Store credentials in a dotfile or some other store.
 
 fn main() {
-    let client = Client::new();
     let host = "runtimeco.atlassian.net";
     let jira = Jira::new(format!("https://{}/", host),
-                         netrc_lookup(&host),
-                         &client);
+                         netrc_lookup(&host)).unwrap();
 
     let q =
         "(fixVersion = 1.1 OR fixVersion = 1.0)
@@ -60,7 +57,7 @@ fn main() {
 
 fn decode_status(issue: &Issue) -> String {
     let name = issue.fields["status"]
-        .find("name").unwrap()
+        .get("name").unwrap()
         .as_str().unwrap();
     let color = match name {
         "Open" => "red",
@@ -87,7 +84,7 @@ fn escape(text: &str) -> String {
 fn nice_versions(issue: &Issue) -> String {
     let vers: Vec<_> = issue.fields["fixVersions"].as_array().unwrap()
         .iter().map(|v| {
-            v.find("name").unwrap().as_str().unwrap()
+            v.get("name").unwrap().as_str().unwrap()
         }).collect();
     vers.join(",")
 }
