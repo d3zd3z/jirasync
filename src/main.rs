@@ -38,15 +38,21 @@ fn main() {
          AND assignee = david.brown
          ORDER BY priority DESC, updated DESC";
     let mut rows = query(&jira, q,
-                         vec!["summary", "assignee", "status"]);
+                         vec!["summary", "assignee", "status", "fixVersions"]);
+
+    // Keys should be sorted first by issue number, and then by fixVersion.  The sort is stable, so
+    // this will result in the desired grouped order.
     rows.sort_by_key(|a| num_of_key(&a.key));
+    rows.sort_by(|a, b| nice_versions(a).cmp(&nice_versions(b)));
+
     println!("Issues at [https://runtimeco.atlassian.net/projects/MCUB]\n");
-    println!("||Issue||Description||Status||");
+    println!("||Issue||Description||Vers||Status||");
     for row in &rows {
-        println!("|[{}|{}]|{}|{}|",
+        println!("|[{}|{}]|{}|{}|{}|",
                  row.key,
                  row.self_link,
                  escape(row.fields["summary"].as_str().unwrap()),
+                 nice_versions(row),
                  decode_status(row));
     }
     println!("\nQuery: {{panel}}{}{{panel}}", q);
@@ -75,6 +81,15 @@ fn escape(text: &str) -> String {
         result.push(ch);
     }
     result
+}
+
+// Format the fixVersions nicely
+fn nice_versions(issue: &Issue) -> String {
+    let vers: Vec<_> = issue.fields["fixVersions"].as_array().unwrap()
+        .iter().map(|v| {
+            v.find("name").unwrap().as_str().unwrap()
+        }).collect();
+    vers.join(",")
 }
 
 // Get the numeric key out of a JIRA formatted issue NAME-nnn.
