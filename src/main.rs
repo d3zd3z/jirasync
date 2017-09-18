@@ -28,15 +28,23 @@ use std::env;
 
 fn main() {
     env_logger::init().unwrap();
-    let host = "runtimeco.atlassian.net";
-    let jira = Jira::new(format!("https://{}/", host),
-                         netrc_lookup(&host)).unwrap();
+
+    // let host = "runtimeco.atlassian.net";
+    // let q =
+    //     "(fixVersion = 1.1 OR fixVersion = 1.0)
+    //      AND assignee = david.brown
+    //      ORDER BY priority DESC, updated DESC";
 
     let host = "jira.zephyrproject.org";
     let q =
         "(fixVersion = 1.1 OR fixVersion = 1.0 OR fixVersion = 1.2)
          AND assignee = david.brown
          ORDER BY priority DESC, updated DESC";
+
+    let jira = Jira::new(format!("https://{}", host),
+                         netrc_lookup(&host)).unwrap();
+
+
     let mut rows = query(&jira, q,
                          vec!["summary", "assignee", "status", "fixVersions"]);
 
@@ -45,7 +53,8 @@ fn main() {
     rows.sort_by_key(|a| num_of_key(&a.key));
     rows.sort_by(|a, b| nice_versions(a).cmp(&nice_versions(b)));
 
-    println!("Issues at [https://runtimeco.atlassian.net/projects/MCUB]\n");
+    // println!("Issues at [https://runtimeco.atlassian.net/projects/MCUB]\n");
+    println!("Issues at [https://runtimeco.atlassian.net/projects/ZEP]\n");
     println!("||Issue||Description||Vers||Status||");
     for row in &rows {
         println!("|[{}|{}]|{}|{}|{}|",
@@ -114,7 +123,10 @@ fn query<J, F>(jira: &Jira, jql: J, fields: Vec<F>) -> Vec<Issue>
     loop {
         sopt.start_at(pos);
         let opt = sopt.build();
-        let mut res = search.list(jql.clone(), &opt).unwrap();
+        // let mut res = search.list(jql.clone(), &opt).unwrap();
+        let res = search.list(jql.clone(), &opt);
+        println!("{:?}", res);
+        let mut res = res.unwrap();
         println!("total: {}, num: {}", res.total, res.issues.len());
         pos += res.issues.len() as u64;
         result.append(&mut res.issues);
