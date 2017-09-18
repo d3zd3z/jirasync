@@ -4,6 +4,7 @@
 //! that are recorded in other JIRA systems, and update a summary in the description of a ticket on
 //! a work internal JIRA.
 
+extern crate env_logger;
 extern crate goji;
 extern crate hyper;
 extern crate netrc;
@@ -26,10 +27,12 @@ use std::env;
 // TODO: Store credentials in a dotfile or some other store.
 
 fn main() {
+    env_logger::init().unwrap();
     let host = "runtimeco.atlassian.net";
     let jira = Jira::new(format!("https://{}/", host),
                          netrc_lookup(&host)).unwrap();
 
+    let host = "jira.zephyrproject.org";
     let q =
         "(fixVersion = 1.1 OR fixVersion = 1.0)
          AND assignee = david.brown
