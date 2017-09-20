@@ -98,7 +98,12 @@ fn nice_versions(issue: &Issue) -> String {
         .iter().map(|v| {
             v.get("name").unwrap().as_str().unwrap()
         }).collect();
-    vers.join(",")
+    let ver = vers.join(",");
+    if ver == "" {
+        " ".to_string()
+    } else {
+        ver
+    }
 }
 
 // Get the numeric key out of a JIRA formatted issue NAME-nnn.
