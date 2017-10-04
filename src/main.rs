@@ -34,7 +34,7 @@ fn main() {
 
     let host = "jira.zephyrproject.org";
     let q =
-        "(fixVersion = 1.1 OR fixVersion = 1.0)
+        "(fixVersion = 1.1 OR fixVersion = 1.0 OR fixVersion = 1.2)
          AND assignee = david.brown
          ORDER BY priority DESC, updated DESC";
     let mut rows = query(&jira, q,
