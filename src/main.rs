@@ -15,6 +15,32 @@ use std::fs::File;
 use std::io::BufReader;
 use std::env;
 
+struct Project {
+    host: String,
+    query: String,
+    name: String,
+}
+
+fn get_project(name: &str) -> Option<Project> {
+    match name {
+        // Zephyr is obsolete, as it has moved to github.
+        "zephyr" => Some(Project {
+            host: "jira.zephyrproject.org".to_string(),
+            query: "assignee = currentUser()
+                    ORDER BY priority DESC, updated DESC".to_string(),
+            name: "ZEP".to_string(),
+        }),
+        "mcuboot" => Some(Project {
+            host: "runtimeco.atlassian.net".to_string(),
+            query: "(fixVersion = 1.1 OR fixVersion = 1.2) AND
+                    assignee = currentUser()
+                    ORDER BY priority DESC, updated DESC".to_string(),
+            name: "MCUB".to_string(),
+        }),
+        _ => None,
+    }
+}
+
 // use std::error;
 // use std::result;
 
@@ -29,23 +55,16 @@ use std::env;
 fn main() {
     env_logger::init().unwrap();
 
-    // let host = "runtimeco.atlassian.net";
-    // let q =
-    //     "(fixVersion = 1.1 OR fixVersion = 1.0)
-    //      AND assignee = david.brown
-    //      ORDER BY priority DESC, updated DESC";
+    let project = match env::args().skip(1).next() {
+        None => panic!("Expect project name"),
+        Some(name) => get_project(&name).expect("Valid project name"),
+    };
 
-    let host = "jira.zephyrproject.org";
-    let q =
-        "(fixVersion = 1.1 OR fixVersion = 1.0 OR fixVersion = 1.2)
-         AND assignee = david.brown
-         ORDER BY priority DESC, updated DESC";
-
-    let jira = Jira::new(format!("https://{}", host),
-                         netrc_lookup(&host)).unwrap();
+    let jira = Jira::new(format!("https://{}", project.host),
+                         netrc_lookup(&project.host)).unwrap();
 
 
-    let mut rows = query(&jira, q,
+    let mut rows = query(&jira, project.query.as_ref(),
                          vec!["summary", "assignee", "status", "fixVersions"]);
 
     // Keys should be sorted first by issue number, and then by fixVersion.  The sort is stable, so
@@ -53,8 +72,7 @@ fn main() {
     rows.sort_by_key(|a| num_of_key(&a.key));
     rows.sort_by(|a, b| nice_versions(a).cmp(&nice_versions(b)));
 
-    // println!("Issues at [https://runtimeco.atlassian.net/projects/MCUB]\n");
-    println!("Issues at [https://runtimeco.atlassian.net/projects/ZEP]\n");
+    println!("Issues at [https://{}/projects/{}]\n", project.host, project.name);
     println!("||Issue||Description||Vers||Status||");
     for row in &rows {
         println!("|[{}|{}]|{}|{}|{}|",
@@ -64,7 +82,7 @@ fn main() {
                  nice_versions(row),
                  decode_status(row));
     }
-    println!("\nQuery: {{panel}}{}{{panel}}", q);
+    println!("\nQuery: {{panel}}{}{{panel}}", project.query);
 }
 
 fn decode_status(issue: &Issue) -> String {
@@ -130,7 +148,7 @@ fn query<J, F>(jira: &Jira, jql: J, fields: Vec<F>) -> Vec<Issue>
         let opt = sopt.build();
         // let mut res = search.list(jql.clone(), &opt).unwrap();
         let res = search.list(jql.clone(), &opt);
-        println!("{:?}", res);
+        // println!("{:?}", res);
         let mut res = res.unwrap();
         println!("total: {}, num: {}", res.total, res.issues.len());
         pos += res.issues.len() as u64;
