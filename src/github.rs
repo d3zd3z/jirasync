@@ -34,33 +34,53 @@ struct Query {
     query: String,
 }
 
-// The json reply.
-#[derive(Debug, Deserialize)]
-struct QueryResult {
-    data: Search,
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all="snake_case")]
+enum QueryResult {
+    Data(Search)
 }
 
-#[derive(Debug, Deserialize)]
-struct Search {
-    search: Edges,
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all="snake_case")]
+enum Search {
+    Search(Edges),
 }
 
-#[derive(Debug, Deserialize)]
-struct Edges {
-    edges: Vec<Edge>,
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all="snake_case")]
+enum Edges {
+    Edges(Vec<Edge>),
 }
 
-#[derive(Debug, Deserialize)]
-struct Edge {
-    node: Node,
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all="snake_case")]
+enum Edge {
+    Node(Node),
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 struct Node {
     title: String,
     state: String,
     url: String,
     number: u64,
+}
+
+impl QueryResult {
+    /// Get the nodes out of the deep structure.
+    fn into_nodes(self) -> Vec<Node> {
+        match self {
+            QueryResult::Data(search) => match search {
+                Search::Search(edges) => match edges {
+                    Edges::Edges(nodes) => {
+                        nodes.into_iter().map(|node| match node {
+                            Edge::Node(node) => node,
+                        }).collect()
+                    }
+                }
+            }
+        }
+    }
 }
 
 pub fn query_zephyr() -> Result<()> {
@@ -105,9 +125,7 @@ pub fn query_zephyr() -> Result<()> {
             })?;
 
             // Flatten the json.
-            let nodes: Vec<_> = v.data.search.edges.into_iter().map(|e| {
-                e.node
-            }).collect();
+            let nodes = v.into_nodes();
 
             dump_github(nodes);
             Ok(())
