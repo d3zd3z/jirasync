@@ -5,15 +5,29 @@
 //! a work internal JIRA.
 
 extern crate env_logger;
+extern crate futures;
 extern crate goji;
 extern crate hyper;
+extern crate hyper_tls;
 extern crate netrc;
+extern crate serde_json;
+extern crate tokio_core;
+
+#[macro_use] extern crate serde_derive;
+
+mod github;
 
 use goji::{Credentials, Issue, Jira, SearchOptions};
 use netrc::Netrc;
+use std::env;
+use std::error;
 use std::fs::File;
 use std::io::BufReader;
-use std::env;
+use std::result;
+
+use github::query_zephyr;
+
+pub type Result<T> = result::Result<T, Box<error::Error + Send + Sync>>;
 
 struct Project {
     host: String,
@@ -57,6 +71,10 @@ fn main() {
 
     let project = match env::args().skip(1).next() {
         None => panic!("Expect project name"),
+        Some(ref name) if name == "zephyr" => {
+            query_zephyr().unwrap();
+            return;
+        }
         Some(name) => get_project(&name).expect("Valid project name"),
     };
 
