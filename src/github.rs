@@ -96,7 +96,7 @@ pub fn query_zephyr() -> Result<()> {
 
     let mut req = Request::new(Method::Post, uri);
     {
-        let mut headers = req.headers_mut();
+        let headers = req.headers_mut();
         headers.set(Authorization(Bearer {
             token: token,
         }));
