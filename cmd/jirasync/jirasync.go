@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os/user"
 	"sort"
 	"strings"
 
@@ -155,7 +156,13 @@ type Login struct {
 
 // Determine the given user's jira password for the given host.
 func findPass(host string) (*Login, error) {
-	n, err := netrc.ParseFile("/home/davidb/.netrc")
+	usr, err := user.Current()
+	if err != nil {
+		return nil, err
+	}
+
+	path := usr.HomeDir + "/.netrc"
+	n, err := netrc.ParseFile(path)
 	if err != nil {
 		return nil, err
 	}
