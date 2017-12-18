@@ -28,6 +28,12 @@ func (p ByFixVersion) Len() int           { return len(p) }
 func (p ByFixVersion) Less(i, j int) bool { return getVer(&p[i]).Compare(getVer(&p[j])) < 0 }
 func (p ByFixVersion) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
+type ByIssueNumber []issue
+
+func (p ByIssueNumber) Len() int           { return len(p) }
+func (p ByIssueNumber) Less(i, j int) bool { return p[i].Number < p[j].Number }
+func (p ByIssueNumber) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
 // Extract the number part of the issue's key.  Needed for the sort to
 // appear in a natural order.  Assumes the issue number follows the
 // hyphen in the key.

@@ -45,6 +45,11 @@ func init() {
 			"ORDER BY priority DESC, updated DESC",
 		desc: "The MCUboot project JIRA",
 	}
+	projects["zephyr"] = &githubProject{
+		user: "d3zd3z",
+		repo: "zephyrproject-rtos/zephyr",
+		desc: "The Zephyr project Github",
+	}
 }
 
 func main() {

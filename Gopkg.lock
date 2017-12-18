@@ -27,9 +27,33 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/golang/protobuf"
+  packages = ["proto"]
+  revision = "1e59b77b52bf8e4b449a57e6f79f21226d571845"
+
+[[projects]]
+  branch = "master"
   name = "github.com/google/go-querystring"
   packages = ["query"]
   revision = "53e6ce116135b80d037921a7fdd5138cf32d7a8a"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/githubql"
+  packages = ["."]
+  revision = "9c1b9ad05045bfb645e04c4f49da9c6aa15176f1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/go"
+  packages = ["ctxhttp"]
+  revision = "004faa6b0118cf52635363b72b51cdcc297800a2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/shurcooL/graphql"
+  packages = [".","ident","internal/jsonutil"]
+  revision = "d0549edd16dceb6939e538fdb1b4f2ec7ee816cc"
 
 [[projects]]
   name = "github.com/trivago/tgo"
@@ -37,9 +61,27 @@
   revision = "e4d1ddd28c17dd89ed26327cf69fded22060671b"
   version = "v1.0.1"
 
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = ["context","context/ctxhttp"]
+  revision = "d866cfc389cec985d6fda2859936a575a55a3ab6"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/oauth2"
+  packages = [".","internal"]
+  revision = "462316686f20eb6df426961c1c131bdaa5dfa68e"
+
+[[projects]]
+  name = "google.golang.org/appengine"
+  packages = ["internal","internal/base","internal/datastore","internal/log","internal/remote_api","internal/urlfetch","urlfetch"]
+  revision = "150dc57a1b433e64154302bdc40b6bb8aefa313a"
+  version = "v1.0.0"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d295403cb0b62447ea9b3c11ea37baf789244dc32b00743caa0768930362dc36"
+  inputs-digest = "d84e564294bf0db65b98cd20f6f5a5ded85d20d3b8baf726564b9777670f59fa"
   solver-name = "gps-cdcl"
   solver-version = 1
