@@ -20,18 +20,18 @@ import (
 	"github.com/bgentry/go-netrc/netrc"
 )
 
-type project struct {
+type jiraProject struct {
 	host  string
 	query string
 	name  string
 	desc  string
 }
 
-var projects map[string]*project
+var projects map[string]*jiraProject
 
 func init() {
-	projects = make(map[string]*project)
-	projects["mcuboot"] = &project{
+	projects = make(map[string]*jiraProject)
+	projects["mcuboot"] = &jiraProject{
 		host: "runtimeco.atlassian.net",
 		query: "(fixVersion = 1.1 OR fixVersion = 1.2) AND " +
 			"assignee = currentUser() " +
@@ -77,7 +77,7 @@ func main() {
 
 }
 
-func jiraQuery(prj *project, login *Login) ([]jira.Issue, error) {
+func jiraQuery(prj *jiraProject, login *Login) ([]jira.Issue, error) {
 	client, err := jira.NewClient(nil, "https://"+prj.host+"/")
 	if err != nil {
 		return nil, err
