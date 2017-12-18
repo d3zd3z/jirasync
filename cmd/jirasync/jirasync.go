@@ -20,6 +20,13 @@ import (
 	"github.com/bgentry/go-netrc/netrc"
 )
 
+// A Project is something that knows how to perform its query and
+// output some data.
+type Project interface {
+	Query() error // Run the query.
+	Desc() string // Return a descriptive string.
+}
+
 type jiraProject struct {
 	host  string
 	query string
@@ -27,10 +34,10 @@ type jiraProject struct {
 	desc  string
 }
 
-var projects map[string]*jiraProject
+var projects map[string]Project
 
 func init() {
-	projects = make(map[string]*jiraProject)
+	projects = make(map[string]Project)
 	projects["mcuboot"] = &jiraProject{
 		host: "runtimeco.atlassian.net",
 		query: "(fixVersion = 1.1 OR fixVersion = 1.2) AND " +
@@ -44,6 +51,7 @@ func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 1 {
+		showNames()
 		log.Fatalf("must specify project as sole argument")
 	}
 	prj, ok := projects[args[0]]
@@ -51,6 +59,14 @@ func main() {
 		showNames()
 		log.Fatalf("Unknown project %q", args[0])
 	}
+
+	err := prj.Query()
+	if err != nil {
+		log.Fatalf("Error running query: %s", err)
+	}
+}
+
+func (prj *jiraProject) Query() error {
 	login, err := findPass(prj.host)
 	if err != nil {
 		log.Fatalf("Unable to find .netrc entry: %s", err)
@@ -75,6 +91,11 @@ func main() {
 	}
 	fmt.Printf("\nQuery: {panel}%s{panel}\n", prj.query)
 
+	return nil
+}
+
+func (prj *jiraProject) Desc() string {
+	return prj.desc
 }
 
 func jiraQuery(prj *jiraProject, login *Login) ([]jira.Issue, error) {
@@ -190,6 +211,6 @@ func showNames() {
 	sort.Strings(names)
 	log.Printf("Possible projects:")
 	for _, k := range names {
-		log.Printf("    %-*s: %s", longest, k, projects[k].desc)
+		log.Printf("    %-*s: %s", longest, k, projects[k].Desc())
 	}
 }
